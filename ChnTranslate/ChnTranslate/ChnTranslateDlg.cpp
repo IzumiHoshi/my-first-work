@@ -185,9 +185,79 @@ DWORD _utf8_Two_Bytes_Range = 0x7ff;
 DWORD _utf8_Three_Bytes_Range = 0xffff;
 DWORD _utf8_Four_Bytes_Range = 0x10ffff;
 
-void ConvertUnicodeToUTF8(char &cUnicode)
+void ConvertUnicodeToUTF8(int &nUnicode)
 {
+	TRACE("%d\n", nUnicode);
+	CString str;
+	int nUTF8 = 0;
+	if (nUnicode <= 0x7f)
+	{
+		return;
+	}
+	else if (nUnicode <= 0x7ff)
+	{
+		for (int i = 0; i < 11; i++)
+		{
+			str.AppendFormat(_T("%s%d "), (nUnicode >> i) & 1);
+		}
+	}
+	else if (nUnicode <= 0xffff)
+	{
+		int nPreUtf8[3] = { 0x80, 0x80, 0xe0 };
+		int nMaskUni[3] = { 0x3f, 0x3f, 0xf };
+		for (size_t i = 0; i < 3; i++)
+		{
+			int nTemp = (nPreUtf8[i] + (nUnicode & nMaskUni[i]));
+			nUTF8 = (nTemp << (i * 8)) + nUTF8;
+			nUnicode >>= 6;
+		}
+		//int nPreUtf8[3] = { 0xe00000, 0x8000, 0x80 };
+		//int nMaskUnicode[3] = { 0xf000, 0xfc0, 0x3f };
 
+		//for (int i = 0; i < 3; i++)
+		//{
+		//	nUTF8 += (nPreUtf8[i] + (nMaskUnicode[i] & nUnicode));
+		//}
+
+		
+		//int i = 0;
+		//int j = 0;
+		//for (; i < 6; i++, j++)
+		//{
+		//	nUTF8 = nUTF8 << 1 + ((nUnicode >> i) & 1);
+		//}
+
+		//nUTF8 <<= 1 + 1;
+		//nUTF8 <<= 1;
+
+		//for (; i < 12; i++)
+		//{
+		//	nUTF8 += ((nUnicode >> i) & 1);
+		//	nUTF8 <<= 1;
+		//}
+
+		//nUTF8 <<= 1 + 1;
+		//nUTF8 <<= 1;
+
+		//for (; i < 16; i++)
+		//{
+		//	nUTF8 += ((nUnicode >> i) & 1);
+		//	nUTF8 <<= 1;
+		//}
+
+		//nUTF8 <<= 1 + 1;
+		//nUTF8 <<= 1 + 1;
+		//nUTF8 <<= 1 + 1;
+	}
+	else if (nUnicode <= 0x10ffff)
+	{
+		for (int i = 0; i < 21; i++)
+		{
+			str.AppendFormat(_T("%s%d "), (nUnicode >> i) & 1);
+		}
+	}
+
+	nUnicode = nUTF8;
 }
 
 void CChnTranslateDlg::OnBnClickedButtonUtf8()
@@ -199,5 +269,10 @@ void CChnTranslateDlg::OnBnClickedButtonUtf8()
 	for (int i = 0; i < nLenth; i++)
 	{
 		TRACE("a%d\n", m_csInput.GetAt(i));
+		int n = m_csInput.GetAt(i);
+		ConvertUnicodeToUTF8(n);
+		m_csOutput.Format(_T("%X"), n);
 	}
+
+	UpdateData(FALSE);
 }
