@@ -41,4 +41,5 @@ public:
 	CString m_csInput;
 	CString m_csOutput;
 	afx_msg void OnBnClickedButtonUtf8();
+	afx_msg void OnBnClickedButtonGbk();
 };
